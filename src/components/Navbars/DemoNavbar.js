@@ -1,285 +1,280 @@
-/*!
-
-=========================================================
-* Argon Design System React - v1.1.2
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-design-system-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-design-system-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 // JavaScript plugin that hides or shows a component based on your scroll
 import Headroom from "headroom.js";
 // reactstrap components
 import {
   Button,
-  UncontrolledCollapse,
-  DropdownMenu,
-  DropdownItem,
   DropdownToggle,
   UncontrolledDropdown,
-  Media,
   NavbarBrand,
   Navbar,
-  NavItem,
-  NavLink,
   Nav,
   Container,
+  Card,
+  CardHeader,
+  CardBody,
+  Modal,
   Row,
   Col,
-  UncontrolledTooltip,
+  Form,
+  FormGroup,
+  Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  Alert,
 } from "reactstrap";
 
-class DemoNavbar extends React.Component {
-  componentDidMount() {
+import api from "../../service/api"
+import { getValue, setValue, getCartValue, removeCartValue } from "../../service/storage"
+
+export default function DemoNavbar () {
+  const [modal, setModals] = useState({});
+  const [user, setUser] = useState(null);
+  const [cart, setCart] = useState(null);
+  const [error, setError] = useState(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const toggleModal = (state) => {
+    const cartValue = getCartValue();
+    setCart(cartValue);
+    setModals({
+      [state]: !modal[state],
+    });
+  };
+
+  const removeCart = (id) => {
+    removeCartValue(id);
+    const cartValue = getCartValue();
+    setCart(cartValue);
+  }
+
+  const login = async () => {
+    if (email === "" || password === "") {
+      setError("Insira as credênciais");
+      return;
+    }
+  
+    try {
+      const result = await api.post(`user/login`, {
+        email: email,
+        password: password,
+      });
+      if (result.data.IsAdmin) {
+        setError("Login invalido");
+        return;
+      }
+
+      setValue({
+        JWT: result.data.JWT,
+      });
+
+      navigate('/perfil')
+    } catch (err) {
+      setError("Erro no login, tente novamente!");
+    }
+  }
+
+  useEffect(() => {
     let headroom = new Headroom(document.getElementById("navbar-main"));
     // initialise
     headroom.init();
-  }
-  state = {
-    collapseClasses: "",
-    collapseOpen: false,
-  };
 
-  onExiting = () => {
-    this.setState({
-      collapseClasses: "collapsing-out",
-    });
-  };
+    const user = getValue()
+    setUser(user)
 
-  onExited = () => {
-    this.setState({
-      collapseClasses: "",
-    });
-  };
+    const cartValue = getCartValue()
+    setCart(cartValue)
+  }, [])
 
-  render() {
-    return (
-      <>
-        <header className="header-global">
-          <Navbar
-            className="navbar-main navbar-transparent navbar-light headroom"
-            expand="lg"
-            id="navbar-main"
-          >
-            <Container>
-              <NavbarBrand className="mr-lg-5" to="/" tag={Link}>
-                <img
-                  alt="..."
-                  src={require("assets/img/brand/argon-react-white.png")}
-                />
-              </NavbarBrand>
-              <button className="navbar-toggler" id="navbar_global">
-                <span className="navbar-toggler-icon" />
-              </button>
-              <UncontrolledCollapse
-                toggler="#navbar_global"
-                navbar
-                className={this.state.collapseClasses}
-                onExiting={this.onExiting}
-                onExited={this.onExited}
-              >
-                <div className="navbar-collapse-header">
-                  <Row>
-                    <Col className="collapse-brand" xs="6">
-                      <Link to="/">
-                        <img
-                          alt="..."
-                          src={require("assets/img/brand/argon-react.png")}
-                        />
-                      </Link>
-                    </Col>
-                    <Col className="collapse-close" xs="6">
-                      <button className="navbar-toggler" id="navbar_global">
-                        <span />
-                        <span />
-                      </button>
-                    </Col>
-                  </Row>
-                </div>
-                <Nav className="navbar-nav-hover align-items-lg-center" navbar>
-                  <UncontrolledDropdown nav>
-                    <DropdownToggle nav>
-                      <i className="ni ni-ui-04 d-lg-none mr-1" />
-                      <span className="nav-link-inner--text">Components</span>
-                    </DropdownToggle>
-                    <DropdownMenu className="dropdown-menu-xl">
-                      <div className="dropdown-menu-inner">
-                        <Media
-                          className="d-flex align-items-center"
-                          href="https://demos.creative-tim.com/argon-design-system-react/#/documentation/overview?ref=adsr-navbar"
-                          target="_blank"
-                        >
-                          <div className="icon icon-shape bg-gradient-primary rounded-circle text-white">
-                            <i className="ni ni-spaceship" />
-                          </div>
-                          <Media body className="ml-3">
-                            <h6 className="heading text-primary mb-md-1">
-                              Getting started
-                            </h6>
-                            <p className="description d-none d-md-inline-block mb-0">
-                              Learn how to use Argon compiling Scss, change
-                              brand colors and more.
-                            </p>
-                          </Media>
-                        </Media>
-                        <Media
-                          className="d-flex align-items-center"
-                          href="https://demos.creative-tim.com/argon-design-system-react/#/documentation/colors?ref=adsr-navbar"
-                          target="_blank"
-                        >
-                          <div className="icon icon-shape bg-gradient-success rounded-circle text-white">
-                            <i className="ni ni-palette" />
-                          </div>
-                          <Media body className="ml-3">
-                            <h6 className="heading text-primary mb-md-1">
-                              Foundation
-                            </h6>
-                            <p className="description d-none d-md-inline-block mb-0">
-                              Learn more about colors, typography, icons and the
-                              grid system we used for Argon.
-                            </p>
-                          </Media>
-                        </Media>
-                        <Media
-                          className="d-flex align-items-center"
-                          href="https://demos.creative-tim.com/argon-design-system-react/#/documentation/alert?ref=adsr-navbar"
-                          target="_blank"
-                        >
-                          <div className="icon icon-shape bg-gradient-warning rounded-circle text-white">
-                            <i className="ni ni-ui-04" />
-                          </div>
-                          <Media body className="ml-3">
-                            <h5 className="heading text-warning mb-md-1">
-                              Components
-                            </h5>
-                            <p className="description d-none d-md-inline-block mb-0">
-                              Browse our 50 beautiful handcrafted components
-                              offered in the Free version.
-                            </p>
-                          </Media>
-                        </Media>
-                      </div>
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
-                  <UncontrolledDropdown nav>
-                    <DropdownToggle nav>
-                      <i className="ni ni-collection d-lg-none mr-1" />
-                      <span className="nav-link-inner--text">Examples</span>
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      <DropdownItem to="/landing-page" tag={Link}>
-                        Landing
-                      </DropdownItem>
-                      <DropdownItem to="/profile-page" tag={Link}>
-                        Profile
-                      </DropdownItem>
-                      <DropdownItem to="/login-page" tag={Link}>
-                        Login
-                      </DropdownItem>
-                      <DropdownItem to="/register-page" tag={Link}>
-                        Register
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
-                </Nav>
-                <Nav className="align-items-lg-center ml-lg-auto" navbar>
-                  <NavItem>
-                    <NavLink
-                      className="nav-link-icon"
-                      href="https://www.facebook.com/creativetim"
-                      id="tooltip333589074"
-                      target="_blank"
-                    >
-                      <i className="fa fa-facebook-square" />
-                      <span className="nav-link-inner--text d-lg-none ml-2">
-                        Facebook
-                      </span>
-                    </NavLink>
-                    <UncontrolledTooltip delay={0} target="tooltip333589074">
-                      Like us on Facebook
-                    </UncontrolledTooltip>
-                  </NavItem>
-                  <NavItem>
-                    <NavLink
-                      className="nav-link-icon"
-                      href="https://www.instagram.com/creativetimofficial"
-                      id="tooltip356693867"
-                      target="_blank"
-                    >
-                      <i className="fa fa-instagram" />
-                      <span className="nav-link-inner--text d-lg-none ml-2">
-                        Instagram
-                      </span>
-                    </NavLink>
-                    <UncontrolledTooltip delay={0} target="tooltip356693867">
-                      Follow us on Instagram
-                    </UncontrolledTooltip>
-                  </NavItem>
-                  <NavItem>
-                    <NavLink
-                      className="nav-link-icon"
-                      href="https://twitter.com/creativetim"
-                      id="tooltip184698705"
-                      target="_blank"
-                    >
-                      <i className="fa fa-twitter-square" />
-                      <span className="nav-link-inner--text d-lg-none ml-2">
-                        Twitter
-                      </span>
-                    </NavLink>
-                    <UncontrolledTooltip delay={0} target="tooltip184698705">
-                      Follow us on Twitter
-                    </UncontrolledTooltip>
-                  </NavItem>
-                  <NavItem>
-                    <NavLink
-                      className="nav-link-icon"
-                      href="https://github.com/creativetimofficial/argon-design-system-react"
-                      id="tooltip112445449"
-                      target="_blank"
-                    >
-                      <i className="fa fa-github" />
-                      <span className="nav-link-inner--text d-lg-none ml-2">
-                        Github
-                      </span>
-                    </NavLink>
-                    <UncontrolledTooltip delay={0} target="tooltip112445449">
-                      Star us on Github
-                    </UncontrolledTooltip>
-                  </NavItem>
-                  <NavItem className="d-none d-lg-block ml-lg-4">
+  return (
+    <>
+      <header className="header-global">
+        <Navbar
+          className="navbar-main navbar-transparent navbar-light headroom"
+          expand="lg"
+          id="navbar-main"
+        >
+          <Container>
+            <NavbarBrand className="mr-lg-5" to="/" tag={Link}>
+              <img
+                alt="..."
+                src={require("assets/img/brand/logo.png")}
+                style={{ width: "150px", height: "50px" }}
+              />
+            </NavbarBrand>
+              <Nav className="align-items-lg-center ml-lg-auto" navbar>
+                <UncontrolledDropdown nav>
+                  <DropdownToggle nav>
                     <Button
                       className="btn-neutral btn-icon"
                       color="default"
-                      href="https://www.creative-tim.com/product/argon-design-system-react?ref=adsr-navbar"
-                      target="_blank"
+                      onClick={() => toggleModal("formCart")}
                     >
                       <span className="btn-inner--icon">
-                        <i className="fa fa-cloud-download mr-2" />
+                        <i className="fa fa-shopping-cart mr-2" />
                       </span>
                       <span className="nav-link-inner--text ml-1">
-                        Download
+                        Meu carrinho
                       </span>
                     </Button>
-                  </NavItem>
-                </Nav>
-              </UncontrolledCollapse>
-            </Container>
-          </Navbar>
-        </header>
-      </>
-    );
-  }
+                    <Modal
+                      className="modal-dialog-centered"
+                      isOpen={modal.formCart}
+                      toggle={() => toggleModal("formCart")}
+                    >
+                      <div className="modal-header">
+                        <h6 className="modal-title" id="modal-title-default">
+                          Meu Carrinho
+                        </h6>
+                        <button
+                          aria-label="Close"
+                          className="close"
+                          data-dismiss="modal"
+                          type="button"
+                          onClick={() => toggleModal("formCart")}
+                        >
+                          <span aria-hidden={true}>×</span>
+                        </button>
+                      </div>
+                      <div className="modal-body">
+                        {cart ? cart.map((c) => (
+                          <Card className="shadow border-0 mt-2">
+                            <CardBody className="py-3">
+                              <Row>
+                                <Col lg="4">
+                                  <img
+                                    alt="..."
+                                    className="img-center img-fluid shadow shadow-lg--hover"
+                                    src={c.images[0].image_path}
+                                    style={{ width: "100px" }}
+                                  />
+                                </Col>
+                                <Col lg="8">
+                                  <h6 className="text-primary text-uppercase">
+                                    {c.name}
+                                  </h6>
+                                  <p className="description mt-3">
+                                    {c.description}
+                                  </p>
+                                  <Button
+                                    color="secondary"
+                                    onClick={() => removeCart(c.id)}
+                                  >
+                                    <span className="btn-inner--icon">
+                                      <i className="fa fa-trash mr-2" />
+                                    </span>
+                                    <span className="nav-link-inner--text ml-1">
+                                      Remover item
+                                    </span>
+                                  </Button>
+                                </Col>
+                              </Row>
+                            </CardBody>
+                          </Card>
+                        )) : null}
+                      </div>
+                      <div className="modal-footer">
+                        <Button 
+                          color="primary" 
+                          type="button" 
+                          onClick={user ? () => navigate("/checkout") : () => toggleModal('formModal')}
+                          disabled={!cart || cart.length === 0}
+                        >
+                          Prosseguir para checkout
+                        </Button>
+                      </div>
+                    </Modal>
+                    <Button
+                      className="btn-neutral btn-icon"
+                      color="default"
+                      onClick={user ? () => navigate("/perfil") : () => toggleModal('formModal')}
+                    >
+                      <span className="btn-inner--icon">
+                        <i className="fa fa-user-circle mr-2" />
+                      </span>
+                      <span className="nav-link-inner--text ml-1">
+                        Minha conta
+                      </span>
+                    </Button>
+                    <Modal
+                      className="modal-dialog-centered"
+                      size="sm"
+                      isOpen={modal.formModal}
+                      toggle={() => toggleModal("formModal")}
+                    >
+                      <div className="modal-body p-0">
+                        {error ? (
+                          <Alert color="danger">
+                            <strong>Erro!</strong> {error}
+                          </Alert>
+                        ) : null }
+                        <Card className="bg-secondary shadow border-0">
+                          <CardHeader className="bg-white pb-5">
+                            <div className="text-muted text-center">
+                              Login
+                            </div>
+                          </CardHeader>
+                          <CardBody className="px-lg-5 py-lg-5">
+                            <Form role="form">
+                              <FormGroup>
+                                <InputGroup className="input-group-alternative">
+                                  <InputGroupAddon addonType="prepend">
+                                    <InputGroupText>
+                                      <i className="ni ni-email-83" />
+                                    </InputGroupText>
+                                  </InputGroupAddon>
+                                  <Input
+                                    placeholder="E-mail"
+                                    type="email"
+                                    onChange={(e) => setEmail(e.target.value)}
+                                  />
+                                </InputGroup>
+                              </FormGroup>
+                              <FormGroup>
+                                <InputGroup className="input-group-alternative">
+                                  <InputGroupAddon addonType="prepend">
+                                    <InputGroupText>
+                                      <i className="ni ni-lock-circle-open" />
+                                    </InputGroupText>
+                                  </InputGroupAddon>
+                                  <Input
+                                    placeholder="Senha"
+                                    type="password"
+                                    autoComplete="off"
+                                    onChange={(e) => setPassword(e.target.value)}
+                                  />
+                                </InputGroup>
+                              </FormGroup>
+                              <div className="justify-content-center">
+                                <a href="/cadastrar">
+                                  Criar conta
+                                </a>
+                              </div>
+                              <div className="text-center">
+                                <Button 
+                                  className="my-4" 
+                                  color="primary" 
+                                  type="button" 
+                                  onClick={() => login()}
+                                >
+                                  Login
+                                </Button>
+                              </div>
+                            </Form>
+                          </CardBody>
+                        </Card>
+                      </div>
+                    </Modal>
+                  </DropdownToggle>
+                </UncontrolledDropdown>
+              </Nav>
+          </Container>
+        </Navbar>
+      </header>
+    </>
+  );
 }
-
-export default DemoNavbar;
