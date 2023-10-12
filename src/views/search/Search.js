@@ -30,7 +30,20 @@ import api from "../../service/api"
 const options = [
   'Chapéus',
   'Cabelo',
-  'Feminino'
+  'Feminino',
+  'Camiseta',
+  'Camisa',
+  'Calça',
+  'Shorts',
+  'Masculino',
+  'Vestido',
+  'Bonés',
+  'Antigo',
+  'Usado',
+  'Novo',
+  'Sapatos',
+  'Sandálias',
+  'Tênis',
 ]
 
 export default function Index () {
